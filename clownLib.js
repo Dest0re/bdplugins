@@ -61,7 +61,7 @@ cl.isTrusted = function () {
 cl.cancel.push(BdApi.monkeyPatch(BdApi.findModuleByProps("sendMessage"), "sendMessage", {
     before: (a) => {
         if (window.clownLib.isClown.toString().length == isClownLength
-            || window.clownLib.isTrusted.toString().length == isTrustedLength) {
+            && window.clownLib.isTrusted.toString().length == isTrustedLength) {
             var content = a.methodArguments[1].content;
             for (var i in window.clownLib.onSendMessage) {
                 content = window.clownLib.onSendMessage[i](content) || content;
