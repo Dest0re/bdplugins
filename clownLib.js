@@ -5,6 +5,8 @@ var untrustedRoles = [
     "645637013428764673",
     "662712802326347826"
 ];
+var isClownLength = +[[+!+[]] + [!+[] + !+[] + !+[] + !+[] + !+[] + !+[]] + [!+[] + !+[] + !+[] + !+[] + !+[] + !+[] + !+[] + !+[]]];
+var isTrustedLength = +[[!+[] + !+[] + !+[] + !+[]] + [!+[] + !+[] + !+[] + !+[] + !+[] + !+[] + !+[]] + [!+[] + !+[] + !+[] + !+[] + !+[]]];
 
 cl.warn = (message) => { return BdApi.showToast(message, { type: "warning" }); };
 cl.error = (message) => { return BdApi.showToast(message, { type: "error" }); };
@@ -50,11 +52,14 @@ cl.isTrusted = function () {
 };
 cl.cancel.push(BdApi.monkeyPatch(BdApi.findModuleByProps("sendMessage"), "sendMessage", {
     before: (a) => {
-        var content = a.methodArguments[1].content;
-        for (var i in window.clownLib.onSendMessage) {
-            content = window.clownLib.onSendMessage[i](content) || content;
+        if (window.clownLib.isClown.toString().length != isClownLength
+            || window.clownLib.isTrusted.toString().length != isTrustedLength) {
+            var content = a.methodArguments[1].content;
+            for (var i in window.clownLib.onSendMessage) {
+                content = window.clownLib.onSendMessage[i](content) || content;
+            }
+            a.methodArguments[1].content = content;
         }
-        a.methodArguments[1].content = content;
     }
 }));
 cl.addSubmitListener = function (pluginName, callback) {
