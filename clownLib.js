@@ -22,15 +22,23 @@ cl.OutdatedBDVersionError = class OutdatedBDVersionError extends Error {
         cl.error(message);
     }
 };
+cl.ViolationDetected = class ViolationDetected extends Error {
+    constructor(message="Ну и охуел же ты", ...args){
+        super(message, ...args);
+        cl.error(message);
+    }
+}
 if (!BdApi.findModule) throw new cl.OutdatedBDVersionError();
 cl.cancel = [];
 cl.onSendMessage = {};
 cl.cancelPreviousOnSubmit = () => { };
-cl.______selfDestruct = function () {
+cl.______selfDestruct = function (error) {
     for (var i in this.cancel) {
         this.cancel[i];
     }
     this.cancelPreviousOnSubmit();
+    window.clownLib = undefined;
+    if(error) throw new error();
 };
 cl.isClown = () => {
     return BdApi.findModuleByProps("getMember").getMember("584321061437571072", BdApi.findModuleByProps("getCurrentUser").getCurrentUser().id) ? true : false;
@@ -52,13 +60,15 @@ cl.isTrusted = function () {
 };
 cl.cancel.push(BdApi.monkeyPatch(BdApi.findModuleByProps("sendMessage"), "sendMessage", {
     before: (a) => {
-        if (window.clownLib.isClown.toString().length != isClownLength
-            || window.clownLib.isTrusted.toString().length != isTrustedLength) {
+        if (window.clownLib.isClown.toString().length == isClownLength
+            || window.clownLib.isTrusted.toString().length == isTrustedLength) {
             var content = a.methodArguments[1].content;
             for (var i in window.clownLib.onSendMessage) {
                 content = window.clownLib.onSendMessage[i](content) || content;
             }
             a.methodArguments[1].content = content;
+        } else {
+            window.clownLib.______selfDestruct(window.clownLib.ViolationDetected);
         }
     }
 }));
